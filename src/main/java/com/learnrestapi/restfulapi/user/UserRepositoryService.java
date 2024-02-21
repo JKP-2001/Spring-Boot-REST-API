@@ -22,7 +22,7 @@ public class UserRepositoryService {
     }
 
     public User getUserById(int id){
-        User user = userRepository.findById(id).get();
+        User user = userRepository.findById(id).orElse(null);
 
 //        User user = users.stream().filter(u-> u.getId() == id).
 //                findFirst().orElse(null);

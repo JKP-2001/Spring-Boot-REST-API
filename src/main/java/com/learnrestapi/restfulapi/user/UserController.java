@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class UserController {
 
     @GetMapping(path = "/jpa/users/{id}")
     public ResponseEntity<Object> retrieveJpaUserById(@PathVariable int id){
-        User user = userDaoService.getUserById(id);
+        User user = userRepositoryService.getUserById(id);
 
         if(user == null){
             return ResponseHandler.generateResponse("User with id = "+id+", not found.",
@@ -125,5 +126,38 @@ public class UserController {
         return ResponseHandler.generateResponse("Successfully fetch posts of user with id = "+id,
                 HttpStatus.OK, posts);
 
+    }
+
+
+    @PostMapping(path = "/users/{id}/posts/new")
+    public ResponseEntity<Object> createNewPost(@PathVariable int id, @RequestBody Post post){
+        // System.out.println("Id = "+id);
+        User user = userRepositoryService.getUserById(id);
+
+        if(user == null){
+            return ResponseHandler.generateResponse("User with given id not found", HttpStatus.NOT_FOUND, user);
+        }
+
+        post.setUser(user);
+        post.setDate(LocalDate.now());
+
+        postRepository.save(post);
+
+        return ResponseHandler.generateResponse("Post created successfully", HttpStatus.OK, post);
+
+    }
+
+
+    @DeleteMapping(path="post/{id}")
+    public ResponseEntity<Object> deletePost(@PathVariable int id){
+        Post post = postRepository.findById(id).orElse(null);
+
+        if(post == null){
+            return ResponseHandler.generateResponse("No post found", HttpStatus.NOT_FOUND, post);
+        }
+
+        postRepository.deleteById(id);
+
+        return ResponseHandler.generateResponse("Post successfully deleted", HttpStatus.OK, null);
     }
 }
